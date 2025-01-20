@@ -134,10 +134,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        arch: ['amd64', 'arm64', 's390x']
+        arch: ['amd64']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Docker Setup QEMU
+        uses: docker/setup-qemu-action@v3.3.0
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
