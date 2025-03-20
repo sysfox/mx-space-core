@@ -1,0 +1,40 @@
+name: Build and Push Custom Docker Image
+
+on:
+  push:
+    branches: [ custom ]
+  pull_request:
+    branches: [ custom ]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      # 强制检出custom分支代码
+      - name: Checkout Custom Branch
+        uses: actions/checkout@v3
+        with:
+          ref: custom
+
+      # 配置Docker构建环境
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # 登录腾讯云镜像仓库
+      - name: Login to Tencent Cloud Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ccr.ccs.tencentyun.com
+          username: ${{ secrets.TENCENT_REGISTRY_USERNAME }}
+          password: ${{ secrets.TENCENT_REGISTRY_PASSWORD }}
+
+      # 构建并推送AMD64架构镜像
+      - name: Build and Push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ccr.ccs.tencentyun.com/tcb-100013541700-bfds/mx-space:latest
