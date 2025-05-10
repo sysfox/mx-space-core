@@ -16,10 +16,10 @@ export const generateDefaultConfig: () => IConfig = () => ({
   },
   mailOptions: {
     enable: false,
-
     user: '',
     pass: '',
     from: '',
+    provider: 'smtp' as const,
     options: {
       host: '',
       port: 465,

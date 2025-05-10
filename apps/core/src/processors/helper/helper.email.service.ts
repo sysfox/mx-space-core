@@ -1,5 +1,6 @@
 import cluster from 'node:cluster'
 import { createTransport } from 'nodemailer'
+import { Resend } from 'resend'
 import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import type Mail from 'nodemailer/lib/mailer'
 
@@ -19,6 +20,8 @@ import { AssetService } from './helper.asset.service'
 export class EmailService implements OnModuleInit, OnModuleDestroy {
   private instance: ReturnType<typeof createTransport>
   private logger: Logger
+  private resendInstance: Resend
+
   constructor(
     private readonly configsService: ConfigsService,
     private readonly assetService: AssetService,
@@ -97,47 +100,67 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
     this.getConfigFromConfigService()
       .then((config) => {
         this.teardown()
-        this.instance = createTransport({
-          ...config,
-          tls: {
-            rejectUnauthorized: false,
-          },
-        })
+        // 根据配置初始化相应的邮件服务
+        if (config.provider === 'smtp') {
+          this.instance = createTransport({
+            host: config.host,
+            port: config.port,
+            auth: config.auth,
+            tls: {
+              rejectUnauthorized: false,
+            },
+          })
+        } else if (config.provider === 'resend' && config.resendApiKey) {
+          this.resendInstance = new Resend(config.resendApiKey)
+        }
+
         this.checkIsReady().then((ready) => {
           if (ready) {
             this.logger.log('送信服务已经加载完毕！')
           }
         })
       })
-
       .catch(() => {})
   }
 
   private getConfigFromConfigService() {
     return new Promise<{
+      provider: 'smtp' | 'resend'
       host: string
       port: number
       auth: { user: string; pass: string }
       secure: boolean
+      resendApiKey: string | undefined
     }>((r, j) => {
       this.configsService.waitForConfigReady().then(({ mailOptions }) => {
-        const { options, user, pass } = mailOptions
-        if (!user && !pass) {
+        const { options, user, pass, provider = 'smtp' } = mailOptions
+        if (provider === 'smtp' && (!user || !pass)) {
           const message = '未启动邮件通知'
+          this.logger.warn(message)
+          return j(message)
+        }
+        if (provider === 'resend' && !options?.resendApiKey) {
+          const message = '未配置 Resend API Key'
           this.logger.warn(message)
           return j(message)
         }
         // @ts-ignore
         r({
-          host: options?.host,
+          provider,
+          host: options?.host || '',
           port: Number.parseInt((options?.port as any) || '465'),
-          auth: { user, pass },
+          auth: { user: user || '', pass: pass || '' },
+          secure: options?.secure ?? true,
+          resendApiKey: options?.resendApiKey,
         } as const)
       })
     })
   }
 
   async checkIsReady() {
+    if (this.resendInstance) {
+      return true
+    }
     return !!this.instance && (await this.verifyClient())
   }
 
@@ -172,6 +195,19 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
 
   async send(options: Mail.Options) {
     try {
+      const mailOptions = await this.configsService.get('mailOptions')
+      if (mailOptions.provider === 'resend' && this.resendInstance) {
+        return await this.resendInstance.emails.send({
+          from: options.from as string,
+          to: options.to as string,
+          subject: options.subject as string,
+          text: options.text as string,
+          html: options.html as string,
+        })
+      }
+      if (!this.instance) {
+        throw new BizException('邮件服务未初始化')
+      }
       return await this.instance.sendMail(options)
     } catch (error) {
       this.logger.warn(error.message)

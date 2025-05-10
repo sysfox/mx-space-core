@@ -91,6 +91,10 @@ class MailOption {
   @IsOptional()
   @JSONSchemaToggleField('使用 SSL/TLS')
   secure: boolean
+  @IsString()
+  @IsOptional()
+  @JSONSchemaPasswordField('Resend API Key', halfFieldOption)
+  resendApiKey?: string
 }
 @JSONSchema({ title: '邮件通知设置' })
 export class MailOptionsDto {
@@ -98,14 +102,37 @@ export class MailOptionsDto {
   @IsOptional()
   @JSONSchemaToggleField('开启邮箱提醒')
   enable: boolean
+
+  @IsString()
+  @IsOptional()
+  @JSONSchemaPlainField('邮件发送方式', {
+    description: '选择使用 SMTP 还是 Resend 发送邮件',
+    'ui:options': {
+      type: 'select',
+      values: [
+        {
+          label: 'SMTP',
+          value: 'smtp',
+        },
+        {
+          label: 'Resend',
+          value: 'resend',
+        },
+      ],
+    },
+  })
+  provider: 'smtp' | 'resend'
+
   @IsEmail()
   @IsOptional()
   @JSONSchemaHalfGirdPlainField('发件邮箱地址')
   from: string
+
   @IsString()
   @IsOptional()
   @JSONSchemaHalfGirdPlainField('SMTP 用户名')
   user: string
+
   @IsString()
   @IsNotEmpty()
   @IsOptional()
