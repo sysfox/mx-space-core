@@ -121,7 +121,6 @@
     "reflect-metadata": "catalog:",
     "remove-markdown": "catalog:",
     "remove-md-codeblock": "catalog:",
-    "resend": "^4.5.1",
     "rxjs": "catalog:",
     "semver": "catalog:",
     "slugify": "catalog:",
