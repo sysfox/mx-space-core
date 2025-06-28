@@ -41,7 +41,6 @@ export class NoteService {
 
   public readonly publicNoteQueryCondition = {
     hide: false,
-    isPublished: true,
     $and: [
       {
         $or: [

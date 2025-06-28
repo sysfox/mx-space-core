@@ -50,11 +50,6 @@ export class NoteModel extends WriteBaseModel {
   @IsOptional()
   hide: boolean
 
-  @prop({ default: true })
-  @IsBoolean()
-  @IsOptional()
-  isPublished?: boolean
-
   @prop({
     select: false,
     type: String,

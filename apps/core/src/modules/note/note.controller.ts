@@ -29,7 +29,6 @@ import {
   NidType,
   NotePasswordQueryDto,
   NoteQueryDto,
-  SetNotePublishStatusDto,
 } from './note.dto'
 import { NoteModel, PartialNoteModel } from './note.model'
 import { NoteService } from './note.service'
@@ -86,7 +85,7 @@ export class NoteController {
     }
 
     // 非认证用户只能查看已发布的手记
-    if (!isAuthenticated && !current.isPublished) {
+    if (!isAuthenticated && current.hide) {
       throw new CannotFindException()
     }
 
@@ -105,7 +104,7 @@ export class NoteController {
     const select = isAuthenticated
       ? 'nid _id title created hide'
       : 'nid _id title created'
-    const condition = isAuthenticated ? {} : { hide: false, isPublished: true }
+    const condition = isAuthenticated ? {} : { hide: false }
 
     // 当前文档直接找，不用加条件，反正里面的东西是看不到的
     const currentDocument = await this.noteService.model
@@ -205,7 +204,7 @@ export class NoteController {
   ) {
     const { nid } = params
     const { password, single: isSingle } = query
-    const condition = isAuthenticated ? {} : { hide: false, isPublished: true }
+    const condition = isAuthenticated ? {} : { hide: false }
     const current: NoteModel | null = await this.noteService.model
       .findOne({
         nid,
@@ -287,7 +286,7 @@ export class NoteController {
     } = query
     const condition: FilterQuery<NoteModel> = isAuthenticated
       ? { $or: [{ hide: false }, { hide: true }] }
-      : { hide: false, isPublished: true }
+      : { hide: false }
 
     return await this.noteService.getNotePaginationByTopicId(
       id,
@@ -299,17 +298,5 @@ export class NoteController {
       },
       { ...condition },
     )
-  }
-
-  @Patch('/:id/publish')
-  @Auth()
-  async setPublishStatus(
-    @Param() params: MongoIdDto,
-    @Body() body: SetNotePublishStatusDto,
-  ) {
-    await this.noteService.updateById(params.id, {
-      isPublished: body.isPublished,
-    })
-    return { success: true }
   }
 }
