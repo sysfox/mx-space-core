@@ -18,6 +18,7 @@ import { HttpService } from './helper.http.service'
 import { ImageService } from './helper.image.service'
 import { JWTService } from './helper.jwt.service'
 import { TextMacroService } from './helper.macro.service'
+import { MetricsService } from './helper.metrics.service'
 import { TaskQueueService } from './helper.tq.service'
 import { UploadService } from './helper.upload.service'
 import { UrlBuilderService } from './helper.url-builder.service'
@@ -32,6 +33,7 @@ const providers: Provider<any>[] = [
   HttpService,
   JWTService,
   ImageService,
+  MetricsService,
   UrlBuilderService,
   TaskQueueService,
   TextMacroService,

@@ -188,6 +188,9 @@ declare -A valueMap=(
   [THROTTLE_TTL]="value,--throttle_ttl=,@@NULL@@"
   [THROTTLE_LIMIT]="value,--throttle_limit=,@@NULL@@"
 
+  # Metrics
+  [METRICS_ENABLE]="switch,--metrics_enable,false"
+
   # Color
   [COLOR]="switch,--color,true"
 )

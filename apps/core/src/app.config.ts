@@ -8,7 +8,12 @@ import { machineIdSync } from 'node-machine-id'
 import { isDebugMode, isDev } from './global/env.global'
 import { parseBooleanishValue } from './utils/tool.util'
 
-const { PORT: ENV_PORT, ALLOWED_ORIGINS, MX_ENCRYPT_KEY } = process.env
+const {
+  PORT: ENV_PORT,
+  ALLOWED_ORIGINS,
+  MX_ENCRYPT_KEY,
+  METRICS_ENABLE,
+} = process.env
 
 const commander = program
   .option('-p, --port <number>', 'server port', ENV_PORT)
@@ -76,6 +81,9 @@ const commander = program
 
   // other
   .option('--color', 'force enable shell color')
+
+  // metrics
+  .option('--metrics_enable', 'enable prometheus metrics endpoint')
 
   // debug
   .option(
@@ -195,3 +203,10 @@ if (ENCRYPT.enable && (!ENCRYPT.key || ENCRYPT.key.length !== 64))
   throw new Error(
     `你开启了 Key 加密（MX_ENCRYPT_KEY or --encrypt_key），但是 Key 的长度不为 64，当前：${ENCRYPT.key.length}`,
   )
+
+export const METRICS = {
+  enable:
+    parseBooleanishValue(argv.metrics_enable) ??
+    parseBooleanishValue(METRICS_ENABLE) ??
+    false,
+}

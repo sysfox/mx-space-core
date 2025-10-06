@@ -3,6 +3,7 @@ import {
   Get,
   HttpCode,
   Post,
+  Res,
   UseInterceptors,
 } from '@nestjs/common'
 import { ApiController } from '~/common/decorators/api-controller.decorator'
@@ -18,7 +19,9 @@ import { AllowAllCorsInterceptor } from './common/interceptors/allow-all-cors.in
 import { RedisKeys } from './constants/cache.constant'
 import { OptionModel } from './modules/configs/configs.model'
 import { RedisService } from './processors/redis/redis.service'
+import { MetricsService } from './processors/helper/helper.metrics.service'
 import { getRedisKey } from './utils/redis.util'
+import type { FastifyReply } from 'fastify'
 
 @ApiController()
 export class AppController {
@@ -26,6 +29,7 @@ export class AppController {
     private readonly redisService: RedisService,
     @InjectModel(OptionModel)
     private readonly optionModel: MongooseModel<OptionModel>,
+    private readonly metricsService: MetricsService,
   ) {}
 
   @Get('/uptime')
@@ -105,5 +109,18 @@ export class AppController {
   @Auth()
   async cleanAllRedisKey() {
     await this.redisService.cleanAllRedisKey()
+  }
+
+  @Get('/metrics')
+  @HttpCache.disable
+  @HTTPDecorators.Bypass
+  async getMetrics(@Res() reply: FastifyReply) {
+    if (!this.metricsService.isEnabled()) {
+      return reply.code(404).send({ message: 'Metrics endpoint is disabled' })
+    }
+
+    const metrics = await this.metricsService.getMetrics()
+    reply.header('Content-Type', this.metricsService.getContentType())
+    return reply.send(metrics)
   }
 }
