@@ -14,6 +14,7 @@ import type { BroadcastOperator, Emitter } from '@socket.io/redis-emitter'
 import { BusinessEvents } from '~/constants/business-event.constant'
 import { RedisKeys } from '~/constants/cache.constant'
 import { RedisService } from '~/processors/redis/redis.service'
+import { MetricsService } from '~/processors/helper/helper.metrics.service'
 import { getRedisKey } from '~/utils/redis.util'
 import { scheduleManager } from '~/utils/schedule.util'
 import { getShortDate } from '~/utils/time.util'
@@ -51,6 +52,7 @@ export class WebEventsGateway
     private readonly redisService: RedisService,
 
     private readonly gatewayService: GatewayService,
+    private readonly metricsService: MetricsService,
   ) {
     super()
   }
@@ -180,10 +182,14 @@ export class WebEventsGateway
 
   whenUserOnline = debounce(
     async () => {
-      this.broadcast(
-        BusinessEvents.VISITOR_ONLINE,
-        await this.sendOnlineNumber(),
-      )
+      const onlineCount = await this.getCurrentClientCount()
+      this.broadcast(BusinessEvents.VISITOR_ONLINE, {
+        online: onlineCount,
+        timestamp: new Date().toISOString(),
+      })
+
+      // Update metrics service with online count
+      this.metricsService.setOnlineUsers(onlineCount)
 
       scheduleManager.schedule(async () => {
         const redisClient = this.redisService.getClient()
@@ -198,7 +204,7 @@ export class WebEventsGateway
         await redisClient.hset(
           getRedisKey(RedisKeys.MaxOnlineCount),
           dateFormat,
-          Math.max(maxOnlineCount, await this.getCurrentClientCount()),
+          Math.max(maxOnlineCount, onlineCount),
         )
         const key = getRedisKey(RedisKeys.MaxOnlineCount, 'total')
 
