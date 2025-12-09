@@ -467,6 +467,36 @@ export class AIDto {
       '生成的摘要目标语言，默认为 `auto`，根据用户的语言自动选择；如果需要固定语言，请填写 [ISO 639-1 语言代码](https://www.w3schools.com/tags/ref_language_codes.asp)',
   })
   aiSummaryTargetLanguage: string
+
+  @IsBoolean()
+  @IsOptional()
+  @JSONSchemaToggleField('通过 MCP 生成摘要', {
+    description: '是否使用 MCP 协议调用 AI 去生成摘要以减少 token 消耗',
+  })
+  enableSummaryViaMcp: boolean
+}
+
+@JSONSchema({ title: 'MCP 服务器设置' })
+export class McpOptionsDto {
+  @IsBoolean()
+  @IsOptional()
+  @JSONSchemaToggleField('启用 MCP 服务器')
+  enable: boolean
+
+  @IsBoolean()
+  @IsOptional()
+  @JSONSchemaToggleField('公开 MCP 服务器', {
+    description: '是否允许外部访问 MCP 服务器（需要提供访问令牌）',
+  })
+  enablePublicAccess: boolean
+
+  @IsString()
+  @IsOptional()
+  @JSONSchemaPasswordField('MCP 访问令牌', {
+    description: '用于访问 MCP 服务器的令牌，留空则自动生成',
+  })
+  @SecretField
+  accessToken: string
 }
 
 export class OAuthDto {

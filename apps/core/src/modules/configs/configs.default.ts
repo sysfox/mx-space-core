@@ -93,6 +93,12 @@ export const generateDefaultConfig: () => IConfig = () => ({
     openAiKey: '',
     aiSummaryTargetLanguage: 'auto',
     enableDeepReading: false,
+    enableSummaryViaMcp: false,
+  },
+  mcpOptions: {
+    enable: false,
+    enablePublicAccess: false,
+    accessToken: '',
   },
   oauth: {
     providers: [],

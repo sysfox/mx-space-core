@@ -19,6 +19,7 @@ import {
   FeatureListDto,
   FriendLinkOptionsDto,
   MailOptionsDto,
+  McpOptionsDto,
   OAuthDto,
   SeoDto,
   TextOptionsDto,
@@ -83,6 +84,9 @@ export abstract class IConfig {
 
   @ConfigField(() => AIDto)
   ai: AIDto
+
+  @ConfigField(() => McpOptionsDto)
+  mcpOptions: McpOptionsDto
 
   @ConfigField(() => OAuthDto)
   oauth: OAuthDto

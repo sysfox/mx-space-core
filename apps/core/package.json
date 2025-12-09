@@ -128,7 +128,8 @@
     "vm2": "3.9.19",
     "wildcard-match": "5.1.4",
     "xss": "1.0.15",
-    "zx-cjs": "7.0.7-0"
+    "zx-cjs": "7.0.7-0",
+    "@modelcontextprotocol/sdk": "^1.24.3"
   },
   "devDependencies": {
     "@nestjs/cli": "11.0.10",

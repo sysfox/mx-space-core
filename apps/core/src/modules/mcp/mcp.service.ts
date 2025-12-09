@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CannotFindException } from '~/common/exceptions/cant-find.exception'
 import { CategoryService } from '../category/category.service'
 import { CommentService } from '../comment/comment.service'
+import { ConfigsService } from '../configs/configs.service'
 import { NoteService } from '../note/note.service'
 import { PageService } from '../page/page.service'
 import { PostService } from '../post/post.service'
@@ -18,6 +19,7 @@ export class McpService {
     private readonly sayService: SayService,
     private readonly recentlyService: RecentlyService,
     private readonly commentService: CommentService,
+    private readonly configsService: ConfigsService,
   ) {}
 
   /**
@@ -323,5 +325,35 @@ export class McpService {
     await this.commentService.fillAndReplaceAvatarUrl(comments)
 
     return comments
+  }
+
+  /**
+   * Generate an AI summary for an article via MCP
+   * @param articleId Article ID
+   * @param lang Target language
+   * @returns Summary text or status message
+   */
+  async generateSummaryViaMcp(articleId: string, lang = 'auto') {
+    const aiConfig = await this.configsService.get('ai')
+
+    if (!aiConfig?.enableSummary || !aiConfig?.enableSummaryViaMcp) {
+      return {
+        success: false,
+        message: 'AI summary via MCP is not enabled',
+      }
+    }
+
+    // This method is a placeholder that indicates the MCP client
+    // should generate the summary using their own AI capabilities
+    // to reduce token consumption on the server side
+    return {
+      success: true,
+      message:
+        'Please use your AI capabilities to generate a summary for this article',
+      articleId,
+      lang,
+      instruction:
+        'Fetch the article content using get_post_by_id or get_note_by_id, then generate a summary in the specified language',
+    }
   }
 }

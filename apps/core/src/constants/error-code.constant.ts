@@ -22,9 +22,14 @@ export enum ErrorCodeEnum {
   AIProcessing = 200003,
   AIResultParsingError = 200004,
 
+  // MCP
+  MCPNotEnabled = 210000,
+
   // system
   MasterLost = 99998,
   BanInDemo = 999999,
+  Unauthorized = 401,
+  ServerError = 500,
 
   //Bing
   BingAPIFailed = 300002,
@@ -56,6 +61,10 @@ export const ErrorCode = Object.freeze<Record<ErrorCodeEnum, [string, number]>>(
     [ErrorCodeEnum.AIException]: ['AI 服务异常', 500],
     [ErrorCodeEnum.AIProcessing]: ['AI 正在处理此请求，请稍后再试', 400],
     [ErrorCodeEnum.AIResultParsingError]: ['AI 结果解析错误', 500],
+
+    [ErrorCodeEnum.MCPNotEnabled]: ['MCP 服务器未开启', 400],
+    [ErrorCodeEnum.Unauthorized]: ['未授权', 401],
+    [ErrorCodeEnum.ServerError]: ['服务器错误', 500],
 
     [ErrorCodeEnum.EmailTemplateNotFound]: ['邮件模板不存在', 400],
 

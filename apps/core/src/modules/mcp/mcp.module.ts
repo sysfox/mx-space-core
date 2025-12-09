@@ -1,11 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common'
 import { CategoryModule } from '../category/category.module'
 import { CommentModule } from '../comment/comment.module'
+import { ConfigsModule } from '../configs/configs.module'
 import { NoteModule } from '../note/note.module'
 import { PageModule } from '../page/page.module'
 import { PostModule } from '../post/post.module'
 import { RecentlyModule } from '../recently/recently.module'
 import { SayModule } from '../say/say.module'
+import { McpController } from './mcp.controller'
 import { McpService } from './mcp.service'
 
 @Module({
@@ -17,9 +19,11 @@ import { McpService } from './mcp.service'
     forwardRef(() => SayModule),
     forwardRef(() => RecentlyModule),
     forwardRef(() => CommentModule),
+    forwardRef(() => ConfigsModule),
   ],
 
   providers: [McpService],
+  controllers: [McpController],
   exports: [McpService],
 })
 export class McpModule {}
