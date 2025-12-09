@@ -437,15 +437,22 @@ export class McpController {
       throw new BizException(ErrorCodeEnum.MCPNotEnabled)
     }
 
-    // For internal use (when public access is disabled), we still require authentication
-    // but the token can be empty or match the configured token
-    // This allows internal services to access MCP without a token
+    // For internal use (when public access is disabled), we check if a token is configured
+    // If no token is configured, internal access is allowed without authentication
+    // If a token is configured, it must match even for internal access
+    // This provides flexibility while maintaining security
     if (!mcpConfig.enablePublicAccess) {
-      // Internal access - no token validation required
+      // If an access token is configured, validate it even for internal access
+      if (mcpConfig.accessToken) {
+        if (!token || token !== mcpConfig.accessToken) {
+          throw new BizException(ErrorCodeEnum.Unauthorized)
+        }
+      }
+      // No token configured - allow internal access
       return
     }
 
-    // If public access is enabled, validate token
+    // If public access is enabled, token is required
     if (!token) {
       throw new BizException(ErrorCodeEnum.Unauthorized)
     }
