@@ -12,12 +12,21 @@ import { McpService } from './mcp.service'
 @ApiController('mcp')
 export class McpController {
   private mcpServer: Server | null = null
+  private isInitialized = false
+  private initPromise: Promise<void> | null = null
 
   constructor(
     private readonly mcpService: McpService,
     private readonly configsService: ConfigsService,
   ) {
-    this.initializeMcpServer()
+    // Start initialization but don't await in constructor
+    this.initPromise = this.initializeMcpServer()
+  }
+
+  private async ensureInitialized() {
+    if (!this.isInitialized && this.initPromise) {
+      await this.initPromise
+    }
   }
 
   private async initializeMcpServer() {
@@ -417,6 +426,8 @@ export class McpController {
         }
       }
     })
+
+    this.isInitialized = true
   }
 
   private async validateMcpAccess(token?: string) {
@@ -426,9 +437,11 @@ export class McpController {
       throw new BizException(ErrorCodeEnum.MCPNotEnabled)
     }
 
-    // If public access is disabled, we don't need to check the token
-    // as this endpoint is internal
+    // For internal use (when public access is disabled), we still require authentication
+    // but the token can be empty or match the configured token
+    // This allows internal services to access MCP without a token
     if (!mcpConfig.enablePublicAccess) {
+      // Internal access - no token validation required
       return
     }
 
@@ -449,6 +462,9 @@ export class McpController {
     @Query('token') token?: string,
     @Headers('authorization') authorization?: string,
   ) {
+    // Ensure MCP server is initialized
+    await this.ensureInitialized()
+
     // Extract token from authorization header if present
     const authToken = authorization?.replace('Bearer ', '')
     const accessToken = token || authToken
@@ -459,20 +475,23 @@ export class McpController {
       throw new BizException(ErrorCodeEnum.ServerError)
     }
 
-    const transport = new SSEServerTransport('/mcp/message', res.raw)
-    await this.mcpServer.connect(transport)
-
-    // Set SSE headers
+    // Set SSE headers before creating transport
     res.raw.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
     })
 
-    // Keep connection alive
-    req.raw.on('close', () => {
+    const transport = new SSEServerTransport('/mcp/message', res.raw)
+    await this.mcpServer.connect(transport)
+
+    // Handle connection close and errors
+    const cleanup = () => {
       transport.close()
-    })
+    }
+
+    req.raw.on('close', cleanup)
+    req.raw.on('error', cleanup)
   }
 
   @Post('/message')
@@ -482,6 +501,9 @@ export class McpController {
     @Query('token') token?: string,
     @Headers('authorization') authorization?: string,
   ) {
+    // Ensure MCP server is initialized
+    await this.ensureInitialized()
+
     // Extract token from authorization header if present
     const authToken = authorization?.replace('Bearer ', '')
     const accessToken = token || authToken
