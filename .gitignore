@@ -2,10 +2,6 @@
 /dist
 node_modules
 
-# API Documentation (auto-generated)
-openapi.json
-swagger.yaml
-
 # Logs
 logs
 *.log

@@ -22,7 +22,7 @@ http://localhost:2333/api-docs
 
 ### OpenAPI 规范文件
 
-服务启动时会自动在项目根目录生成以下文件：
+项目根目录已包含预生成的 API 文档文件：
 
 - **`openapi.json`** - JSON 格式的 OpenAPI 3.0 规范文件
 - **`swagger.yaml`** - YAML 格式的 Swagger 规范文件
@@ -36,10 +36,19 @@ http://localhost:2333/api-docs
 - **APITable**
 - 其他支持 OpenAPI 的工具
 
-### 单独生成文档
+**注意**：这些文件已提交到仓库，无需运行服务即可直接使用。
 
-如果不想启动完整服务，可以使用以下命令单独生成 API 文档：
+### 更新文档
 
+如需更新 API 文档到最新状态：
+
+**方式一：启动服务自动更新**
+```bash
+pnpm dev
+# 服务启动时会自动重新生成文档
+```
+
+**方式二：单独生成（推荐）**
 ```bash
 pnpm -C apps/core swagger
 ```
@@ -54,25 +63,22 @@ pnpm -C apps/core swagger
 
 ### 步骤
 
-1. **生成 API 文档**
+1. **获取 API 文档**
    
-   方式一：启动服务（自动生成）
+   方式一：直接使用仓库中的文档文件
+   - `openapi.json` - JSON 格式（推荐用于 Apifox/Postman）
+   - `swagger.yaml` - YAML 格式（推荐用于 Swagger Editor）
+   
+   方式二：生成最新文档（可选）
    ```bash
+   # 启动服务（自动生成）
    pnpm dev
-   ```
    
-   方式二：单独生成（推荐，更快）
-   ```bash
+   # 或单独生成（推荐，更快）
    pnpm -C apps/core swagger
    ```
 
-2. **选择文档格式**
-   
-   生成后会在项目根目录得到两个文件：
-   - `openapi.json` - JSON 格式（推荐用于 Apifox/Postman）
-   - `swagger.yaml` - YAML 格式（推荐用于 Swagger Editor）
-
-3. **导入到 Apifox**
+2. **导入到 Apifox**
    
    - 打开 Apifox 客户端
    - 创建新项目或选择已有项目
@@ -82,7 +88,7 @@ pnpm -C apps/core swagger
    - 或者直接粘贴文件内容
    - 点击确认导入
 
-4. **验证导入结果**
+3. **验证导入结果**
    
    导入后，Apifox 会自动识别：
    - ✅ 所有 API 端点和分组（按模块）
