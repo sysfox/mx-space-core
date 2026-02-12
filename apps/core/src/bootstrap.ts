@@ -15,6 +15,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor'
 import { extendedZodValidationPipeInstance } from './common/zod'
 import { logger } from './global/consola.global'
 import { isDev, isMainProcess, isTest } from './global/env.global'
+import { setupSwagger } from './swagger.config'
 import { checkInit } from './utils/check-init.util'
 import { sendTelemetry, startHeartbeat } from './utils/telemetry.util'
 
@@ -76,6 +77,9 @@ export async function bootstrap() {
   app.useGlobalGuards(new SpiderGuard())
   !isTest && app.useWebSocketAdapter(new RedisIoAdapter(app))
 
+  // Setup Swagger API documentation
+  setupSwagger(app)
+
   await app.listen(
     {
       host: '0.0.0.0',
@@ -92,6 +96,7 @@ export async function bootstrap() {
       }
 
       logger.success(`[${prefix + pid}] Server listen on: ${url}`)
+      logger.success(`[${prefix + pid}] API Documentation: ${url}/api-docs`)
       logger.success(
         `[${prefix + pid}] Admin Local Dashboard: ${url}/proxy/qaqdmin`,
       )
