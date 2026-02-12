@@ -23,6 +23,16 @@
 - `pnpm test`：运行测试
 - `pnpm lint`：运行 ESLint
 
+## API 文档
+
+Mix Space 提供完整的 OpenAPI/Swagger API 文档：
+
+- **在线文档**: 启动服务后访问 `http://localhost:2333/api-docs`
+- **生成文档**: 运行 `pnpm -C apps/core swagger` 生成 `openapi.json` 和 `swagger.yaml`
+- **导入工具**: 支持 Apifox、Postman、Insomnia 等
+
+详细说明请查看 [API 文档指南](./apps/core/docs/API_DOCUMENTATION.md)
+
 ## 升级指南
 
 从 v9 升级到 v10 涉及鉴权体系重构，属于 **breaking change**。

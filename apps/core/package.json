@@ -38,6 +38,7 @@
     "test": "NODE_ENV=development vitest",
     "test:watch": "NODE_ENV=development vitest -w",
     "docs": "npx @compodoc/compodoc -p tsconfig.json -s -d docs",
+    "swagger": "cross-env NODE_ENV=development tsx src/generate-swagger.ts",
     "publish": "bump"
   },
   "bump": {

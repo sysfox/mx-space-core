@@ -2,7 +2,9 @@ import { writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { dump as yamlDump } from 'js-yaml'
 import { API_VERSION } from './app.config'
+import { logger } from './global/consola.global'
 import { cwd } from './global/env.global'
 
 export function setupSwagger(app: INestApplication) {
@@ -42,10 +44,23 @@ export function setupSwagger(app: INestApplication) {
   })
 
   // Export OpenAPI spec as JSON file for Apifox import
-  const outputPath = resolve(cwd, 'openapi.json')
-  writeFileSync(outputPath, JSON.stringify(document, null, 2), {
+  const jsonPath = resolve(cwd, 'openapi.json')
+  writeFileSync(jsonPath, JSON.stringify(document, null, 2), {
     encoding: 'utf8',
   })
+  logger.success(`OpenAPI JSON exported to: ${jsonPath}`)
+
+  // Export OpenAPI spec as YAML file for Swagger import
+  const yamlPath = resolve(cwd, 'swagger.yaml')
+  const yamlContent = yamlDump(document, {
+    indent: 2,
+    lineWidth: -1,
+    noRefs: true,
+  })
+  writeFileSync(yamlPath, yamlContent, {
+    encoding: 'utf8',
+  })
+  logger.success(`Swagger YAML exported to: ${yamlPath}`)
 
   return document
 }
