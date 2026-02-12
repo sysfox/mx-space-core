@@ -18,6 +18,7 @@ import { IdempotenceInterceptor } from './common/interceptors/idempotence.interc
 import { JSONTransformInterceptor } from './common/interceptors/json-transform.interceptor'
 import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { RequestContextMiddleware } from './common/middlewares/request-context.middleware'
+import { isDev } from './global/env.global'
 import { AckModule } from './modules/ack/ack.module'
 import { ActivityModule } from './modules/activity/activity.module'
 import { AggregateModule } from './modules/aggregate/aggregate.module'
