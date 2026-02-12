@@ -25,36 +25,33 @@ export const ApiController: (
 
   if (typeof controller === 'string') {
     const tagName = getTagName(controller)
-    const ControllerDecorator = Controller(transformPath(controller), ...args)
+    const transformedPath = transformPath(controller)
+    const ControllerDecorator = Controller(transformedPath, ...args)
     const TagDecorator = ApiTags(tagName)
     return (target: any) => {
-      TagDecorator(target)
       ControllerDecorator(target)
+      TagDecorator(target)
     }
   } else if (Array.isArray(controller)) {
     const tagName = getTagName(controller)
-    const ControllerDecorator = Controller(
-      controller.map((path) => transformPath(path)),
-      ...args,
-    )
+    const transformedPaths = controller.map((path) => transformPath(path))
+    const ControllerDecorator = Controller(transformedPaths, ...args)
     const TagDecorator = ApiTags(tagName)
     return (target: any) => {
-      TagDecorator(target)
       ControllerDecorator(target)
+      TagDecorator(target)
     }
   } else {
     const path = controller.path || ''
     const tagName = getTagName(path)
-    const ControllerDecorator = Controller(
-      Array.isArray(path)
-        ? path.map((i) => transformPath(i))
-        : transformPath(path),
-      ...args,
-    )
+    const transformedPath = Array.isArray(path)
+      ? path.map((i) => transformPath(i))
+      : transformPath(path)
+    const ControllerDecorator = Controller(transformedPath, ...args)
     const TagDecorator = ApiTags(tagName)
     return (target: any) => {
-      TagDecorator(target)
       ControllerDecorator(target)
+      TagDecorator(target)
     }
   }
 }
