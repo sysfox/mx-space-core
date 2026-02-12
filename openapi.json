@@ -1,0 +1,783 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Mix Space API",
+    "description": "Mix Space - Personal Space, 个人空间的完整后端 API 文档",
+    "version": "2",
+    "contact": {
+      "name": "Mix Space",
+      "url": "https://github.com/mx-space/core"
+    },
+    "license": {
+      "name": "AGPLv3",
+      "url": "https://github.com/mx-space/core/blob/master/LICENSE"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:2333",
+      "description": "Development Server"
+    },
+    {
+      "url": "/api/v2",
+      "description": "Production Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "认证与授权相关接口"
+    },
+    {
+      "name": "Posts",
+      "description": "文章管理"
+    },
+    {
+      "name": "Pages",
+      "description": "页面管理"
+    },
+    {
+      "name": "Notes",
+      "description": "笔记/日记管理"
+    },
+    {
+      "name": "Categories",
+      "description": "分类管理"
+    },
+    {
+      "name": "Topics",
+      "description": "专题管理"
+    },
+    {
+      "name": "Comments",
+      "description": "评论管理"
+    },
+    {
+      "name": "Owner",
+      "description": "站长信息"
+    },
+    {
+      "name": "Reader",
+      "description": "读者管理"
+    },
+    {
+      "name": "Subscribe",
+      "description": "订阅管理"
+    },
+    {
+      "name": "File",
+      "description": "文件管理"
+    },
+    {
+      "name": "Ai",
+      "description": "AI 功能"
+    },
+    {
+      "name": "Ai-writer",
+      "description": "AI 写作助手"
+    },
+    {
+      "name": "Ai-summary",
+      "description": "AI 摘要生成"
+    },
+    {
+      "name": "Ai-translation",
+      "description": "AI 翻译"
+    },
+    {
+      "name": "Ai-task",
+      "description": "AI 任务管理"
+    },
+    {
+      "name": "Search",
+      "description": "搜索功能"
+    },
+    {
+      "name": "Feed",
+      "description": "RSS/Atom 订阅"
+    },
+    {
+      "name": "Sitemap",
+      "description": "站点地图"
+    },
+    {
+      "name": "Backup",
+      "description": "备份与恢复"
+    },
+    {
+      "name": "Option",
+      "description": "系统选项"
+    },
+    {
+      "name": "Webhook",
+      "description": "Webhook 管理"
+    },
+    {
+      "name": "Health",
+      "description": "健康检查"
+    },
+    {
+      "name": "Aggregate",
+      "description": "聚合数据"
+    },
+    {
+      "name": "Activity",
+      "description": "活动记录"
+    },
+    {
+      "name": "Recently",
+      "description": "最近动态"
+    },
+    {
+      "name": "Link",
+      "description": "友链管理"
+    },
+    {
+      "name": "Say",
+      "description": "说说管理"
+    },
+    {
+      "name": "Snippet",
+      "description": "代码片段"
+    },
+    {
+      "name": "Draft",
+      "description": "草稿管理"
+    },
+    {
+      "name": "Markdown",
+      "description": "Markdown 处理"
+    },
+    {
+      "name": "Helper",
+      "description": "辅助工具"
+    },
+    {
+      "name": "Server-time",
+      "description": "服务器时间"
+    },
+    {
+      "name": "Analyze",
+      "description": "数据分析"
+    },
+    {
+      "name": "Update",
+      "description": "更新检查"
+    },
+    {
+      "name": "Debug",
+      "description": "调试工具"
+    },
+    {
+      "name": "Cron-task",
+      "description": "定时任务"
+    },
+    {
+      "name": "Meta-preset",
+      "description": "元数据预设"
+    },
+    {
+      "name": "Serverless",
+      "description": "Serverless 函数"
+    },
+    {
+      "name": "Dependency",
+      "description": "依赖管理"
+    },
+    {
+      "name": "Initiative",
+      "description": "主动推送"
+    },
+    {
+      "name": "Render",
+      "description": "渲染服务"
+    },
+    {
+      "name": "Ack",
+      "description": "确认服务"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "name": "Authorization",
+        "description": "Enter JWT token",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "总数"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页数量"
+          },
+          "page": {
+            "type": "integer",
+            "description": "当前页"
+          },
+          "total_page": {
+            "type": "integer",
+            "description": "总页数"
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "description": "是否有下一页"
+          },
+          "has_prev_page": {
+            "type": "boolean",
+            "description": "是否有上一页"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "用户登录",
+        "operationId": "AuthController_login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登录成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "认证失败"
+          }
+        }
+      }
+    },
+    "/posts": {
+      "get": {
+        "tags": ["Posts"],
+        "summary": "获取文章列表（分页）",
+        "operationId": "PostController_getPaginate",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回文章列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Posts"],
+        "summary": "创建新文章",
+        "operationId": "PostController_create",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "文章标题"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "URL 别名"
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "文章内容"
+                  },
+                  "category_id": {
+                    "type": "string",
+                    "description": "分类 ID"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "description": "摘要"
+                  },
+                  "copyright": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": ["title", "slug", "text", "category_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "文章创建成功"
+          },
+          "401": {
+            "description": "未授权"
+          }
+        }
+      }
+    },
+    "/posts/{id}": {
+      "get": {
+        "tags": ["Posts"],
+        "summary": "获取文章详情",
+        "operationId": "PostController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "404": {
+            "description": "文章不存在"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Posts"],
+        "summary": "更新文章",
+        "operationId": "PostController_update",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新成功"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Posts"],
+        "summary": "删除文章",
+        "operationId": "PostController_delete",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "删除成功"
+          }
+        }
+      }
+    },
+    "/pages": {
+      "get": {
+        "tags": ["Pages"],
+        "summary": "获取页面列表",
+        "operationId": "PageController_getList",
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Pages"],
+        "summary": "创建新页面",
+        "operationId": "PageController_create",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "创建成功"
+          }
+        }
+      }
+    },
+    "/notes": {
+      "get": {
+        "tags": ["Notes"],
+        "summary": "获取笔记列表",
+        "operationId": "NoteController_getList",
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Notes"],
+        "summary": "创建新笔记",
+        "operationId": "NoteController_create",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "创建成功"
+          }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "获取分类列表",
+        "operationId": "CategoryController_getList",
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Categories"],
+        "summary": "创建新分类",
+        "operationId": "CategoryController_create",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "创建成功"
+          }
+        }
+      }
+    },
+    "/comments": {
+      "get": {
+        "tags": ["Comments"],
+        "summary": "获取评论列表",
+        "operationId": "CommentController_getList",
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Comments"],
+        "summary": "创建新评论",
+        "operationId": "CommentController_create",
+        "responses": {
+          "201": {
+            "description": "创建成功"
+          }
+        }
+      }
+    },
+    "/aggregate": {
+      "get": {
+        "tags": ["Aggregate"],
+        "summary": "获取聚合数据",
+        "operationId": "AggregateController_getAggregate",
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "健康检查",
+        "operationId": "HealthController_check",
+        "responses": {
+          "200": {
+            "description": "服务正常"
+          }
+        }
+      }
+    },
+    "/search": {
+      "get": {
+        "tags": ["Search"],
+        "summary": "搜索内容",
+        "operationId": "SearchController_search",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/feed": {
+      "get": {
+        "tags": ["Feed"],
+        "summary": "获取 RSS/Atom 订阅",
+        "operationId": "FeedController_getFeed",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backup": {
+      "get": {
+        "tags": ["Backup"],
+        "summary": "导出备份",
+        "operationId": "BackupController_export",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Backup"],
+        "summary": "导入备份",
+        "operationId": "BackupController_import",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "导入成功"
+          }
+        }
+      }
+    },
+    "/owner": {
+      "get": {
+        "tags": ["Owner"],
+        "summary": "获取站长信息",
+        "operationId": "OwnerController_getInfo",
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Owner"],
+        "summary": "更新站长信息",
+        "operationId": "OwnerController_update",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "更新成功"
+          }
+        }
+      }
+    },
+    "/webhooks": {
+      "get": {
+        "tags": ["Webhook"],
+        "summary": "获取 Webhook 列表",
+        "operationId": "WebhookController_getList",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Webhook"],
+        "summary": "创建 Webhook",
+        "operationId": "WebhookController_create",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "创建成功"
+          }
+        }
+      }
+    }
+  }
+}

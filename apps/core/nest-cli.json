@@ -4,7 +4,16 @@
   "compilerOptions": {
     "builder": "swc",
     "typeCheck": true,
-    "plugins": [],
+    "plugins": [
+      {
+        "name": "@nestjs/swagger",
+        "options": {
+          "classValidatorShim": true,
+          "introspectComments": true,
+          "dtoFileNameSuffix": [".dto.ts", ".schema.ts", ".model.ts"]
+        }
+      }
+    ],
     "assets": [
       "**/*.json"
     ]

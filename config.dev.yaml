@@ -1,0 +1,44 @@
+# MongoDB 配置文件
+# 此文件用于本地开发环境的 MongoDB 自主配置
+
+# MongoDB 数据库配置
+collection_name: mx-space
+db_host: 127.0.0.1
+db_port: 27017
+db_user: ''
+db_password: ''
+db_options: ''
+
+# 如果使用 MongoDB 连接字符串，可以直接配置（优先级高于上面的单独配置）
+# db_connection_string: mongodb://localhost:27017/mx-space
+
+# Redis 配置
+redis_host: localhost
+redis_port: 6379
+redis_password: ''
+
+# JWT 配置
+jwt_secret: mx-space-dev-secret-change-in-production
+jwt_expire: 7
+
+# 服务器配置
+port: 2333
+
+# 跨域配置
+allowed_origins: localhost:*,127.0.0.1:*,*.dev
+
+# 加密配置（开发环境可选）
+encrypt_enable: false
+# encrypt_key: 将在首次运行时自动生成
+
+# 缓存配置
+http_cache_enable_cdn_header: true
+http_cache_enable_force_cache_header: false
+
+# 限流配置
+throttle_ttl: 10
+throttle_limit: 20
+
+# 调试选项（开发环境）
+# http_request_verbose: true
+# debug_memory_dump: false
