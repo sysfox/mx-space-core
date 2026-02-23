@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [Unreleased]
+
+### Features
+
+* **draft:** implement draft history service with diff strategies ([5171707](https://github.com/mx-space/core/commit/5171707e6b32a7d0d115f0624a9860d5814ca2a9))
+  - Add `DraftHistoryService` to track draft versions and support point-in-time restoration
+  - Introduce pluggable diff strategies: text (diff-match-patch) for Markdown, JSON (jsondiffpatch) for Lexical rich text
+  - Store full snapshots every 5 versions or when diff exceeds 70% of content size; otherwise store incremental patches
+  - Cap history at 100 entries with automatic trimming that preserves restorability
+  - New API endpoints: `GET /drafts/:id/history`, `GET /drafts/:id/history/:version`, `POST /drafts/:id/restore/:version`
+
+
+
 ## [10.0.4](https://github.com/mx-space/core/compare/v10.0.3...v10.0.4) (2026-02-18)
 
 
