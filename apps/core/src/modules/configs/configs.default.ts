@@ -84,6 +84,19 @@ export const generateDefaultConfig: () => IConfig = () => ({
     pathTemplate: '{type}',
     videoMaxSize: 100,
   },
+  imageCompressionOptions: {
+    enable: false,
+    whitelist: [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+      'image/avif',
+      'image/tiff',
+    ],
+    targetFormat: 'webp',
+    quality: 80,
+  },
   commentUploadOptions: {
     enable: true,
     pendingTtlMinutes: 120,

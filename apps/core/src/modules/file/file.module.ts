@@ -7,6 +7,7 @@ import { FileController } from './file.controller'
 import { FileService } from './file.service'
 import { FileReferenceRepository } from './file-reference.repository'
 import { FileReferenceService } from './file-reference.service'
+import { ImageCompressionService } from './image-compression.service'
 import { ReaderUploadQuotaInterceptor } from './reader-upload-quota.interceptor'
 
 @Global()
@@ -18,6 +19,7 @@ import { ReaderUploadQuotaInterceptor } from './reader-upload-quota.interceptor'
     FileReferenceService,
     FileReferenceRepository,
     CommentUploadService,
+    ImageCompressionService,
     ReaderUploadQuotaInterceptor,
   ],
   exports: [FileService, FileReferenceService, CommentUploadService],

@@ -382,6 +382,84 @@ export class FileUploadOptionsDto extends createZodDto(
 ) {}
 export type FileUploadOptionsConfig = z.infer<typeof FileUploadOptionsSchema>
 
+// ==================== Image Compression Options ====================
+export const ImageCompressionOptionsSchema = section('Image compression', {
+  enable: field.toggle(
+    z.boolean().optional(),
+    'Enable image compression on upload',
+    {
+      description:
+        'When enabled, uploaded images are compressed via sharp. Supports format conversion and resizing.',
+    },
+  ),
+  whitelist: field.array(
+    z.array(z.string()).optional(),
+    'Allowed input MIME types',
+    {
+      description:
+        'Only images matching these MIME types are compressed. Defaults to: image/jpeg, image/png, image/webp, image/gif, image/avif, image/tiff',
+    },
+  ),
+  targetFormat: field.select(
+    z.enum(['jpeg', 'png', 'webp', 'avif']).optional().default('webp'),
+    'Target output format',
+    [
+      { label: 'JPEG', value: 'jpeg' },
+      { label: 'PNG', value: 'png' },
+      { label: 'WebP', value: 'webp' },
+      { label: 'AVIF', value: 'avif' },
+    ],
+    {
+      description:
+        'Format to convert images to. Defaults to WebP, which offers the best compression-quality balance.',
+    },
+  ),
+  quality: field.number(
+    z.preprocess(
+      (val) => (val ? Number(val) : val),
+      z.number().int().min(1).max(100).optional(),
+    ),
+    'Output quality (1-100)',
+    {
+      'ui:options': { halfGrid: true },
+      description:
+        'Default 80. Lower = smaller file but lower quality. Only applies when the target format supports quality (JPEG, WebP, AVIF).',
+    },
+  ),
+  maxWidth: field.number(
+    z.preprocess(
+      (val) =>
+        val === '' || val === null || val === undefined ? val : Number(val),
+      z.number().int().min(1).optional(),
+    ),
+    'Max width (px)',
+    {
+      'ui:options': { halfGrid: true },
+      description:
+        'Images wider than this are downscaled preserving aspect ratio. Leave empty for no limit.',
+    },
+  ),
+  maxHeight: field.number(
+    z.preprocess(
+      (val) =>
+        val === '' || val === null || val === undefined ? val : Number(val),
+      z.number().int().min(1).optional(),
+    ),
+    'Max height (px)',
+    {
+      'ui:options': { halfGrid: true },
+      description:
+        'Images taller than this are downscaled preserving aspect ratio. Leave empty for no limit.',
+    },
+  ),
+})
+export class ImageCompressionOptionsDto extends createZodDto(
+  ImageCompressionOptionsSchema,
+) {}
+export type ImageCompressionOptionsConfig = z.infer<
+  typeof ImageCompressionOptionsSchema
+>
+
 // ==================== Baidu Search Options ====================
 export const BaiduSearchOptionsSchema = section('Baidu push settings', {
   enable: field.toggle(z.boolean().optional(), 'Enable push'),
@@ -908,6 +986,7 @@ export const configSchemaMapping = {
   backupOptions: BackupOptionsSchema,
   imageStorageOptions: ImageStorageOptionsSchema,
   fileUploadOptions: FileUploadOptionsSchema,
+  imageCompressionOptions: ImageCompressionOptionsSchema,
   commentUploadOptions: CommentUploadOptionsSchema,
   baiduSearchOptions: BaiduSearchOptionsSchema,
   bingSearchOptions: BingSearchOptionsSchema,

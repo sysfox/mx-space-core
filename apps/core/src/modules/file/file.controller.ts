@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { Readable } from 'node:stream'
 
 import {
   Body,
@@ -44,6 +45,7 @@ import {
 import { FileService } from './file.service'
 import { FileReferenceService } from './file-reference.service'
 import { FileDeletionReason } from './file-reference.types'
+import { ImageCompressionService } from './image-compression.service'
 
 @ApiController(['objects', 'files'])
 export class FileController {
@@ -52,6 +54,7 @@ export class FileController {
     private readonly uploadService: UploadService,
     private readonly fileReferenceService: FileReferenceService,
     private readonly configsService: ConfigsService,
+    private readonly imageCompressionService: ImageCompressionService,
   ) {}
 
   @Delete('/orphans/batch')
@@ -262,27 +265,48 @@ export class FileController {
       const contentType = lookup(file.filename) || 'application/octet-stream'
 
       let s3Url: string
+      let s3Filename = filename
+      let s3ObjectKey = objectKey
+      let s3ContentType = contentType
       if (type === 'video') {
-        s3Url = await s3Uploader.uploadStream(file.file, objectKey, contentType)
+        s3Url = await s3Uploader.uploadStream(
+          file.file,
+          s3ObjectKey,
+          s3ContentType,
+        )
       } else {
         const chunks: Buffer[] = []
         for await (const chunk of file.file) {
           chunks.push(chunk)
         }
+        let buffer = Buffer.concat(chunks)
+
+        if (type === 'image') {
+          const compressed = await this.imageCompressionService.compress(buffer)
+          if (compressed) {
+            buffer = compressed.data
+            s3Filename = filename.replace(/\.[^.]+$/, '') + compressed.ext
+            s3ObjectKey = prefixPath
+              ? `${prefixPath}/${s3Filename}`
+              : s3Filename
+            s3ContentType = compressed.mime
+          }
+        }
+
         s3Url = await s3Uploader.uploadBuffer(
-          Buffer.concat(chunks),
-          objectKey,
-          contentType,
+          buffer,
+          s3ObjectKey,
+          s3ContentType,
         )
       }
 
       await this.fileReferenceService.createPendingReference(
         s3Url,
-        filename,
-        objectKey,
+        s3Filename,
+        s3ObjectKey,
       )
 
-      return { url: s3Url, name: filename }
+      return { url: s3Url, name: s3Filename }
     }
 
     if (
@@ -325,20 +349,62 @@ export class FileController {
       relativePath = path.join(pathWithoutType, rawFilename)
     }
 
-    await this.service.writeFile(type, relativePath, file.file)
+    // Buffer the stream first so we can process (compress) it before writing
+    const chunks: Buffer[] = []
+    let totalBytes = 0
+    const maxSize =
+      type === 'video'
+        ? (uploadConfig.videoMaxSize ?? 100) * 1024 * 1024
+        : type === 'image'
+          ? 20 * 1024 * 1024
+          : Number.MAX_SAFE_INTEGER
+    for await (const chunk of file.file) {
+      chunks.push(chunk)
+      totalBytes += chunk.length
+      if (totalBytes > maxSize) {
+        throw createAppException(AppErrorCode.FILE_TOO_LARGE)
+      }
+    }
+
     if (file.file.truncated) {
-      await this.service.deleteFile(type, relativePath).catch(() => void 0)
       throw createAppException(AppErrorCode.FILE_TOO_LARGE)
     }
-    const fileUrl = await this.service.resolveFileUrl(type, relativePath)
+
+    let imageBuffer = Buffer.concat(chunks)
+    let finalRelativePath = relativePath
+
+    if (type === 'image') {
+      const compressed =
+        await this.imageCompressionService.compress(imageBuffer)
+      if (compressed) {
+        imageBuffer = compressed.data
+        const compressedName =
+          rawFilename.replace(/\.[^.]+$/, '') + compressed.ext
+        if (basePath === type || !basePath) {
+          finalRelativePath = compressedName
+        } else {
+          const pWithoutType = basePath.startsWith(`${type}/`)
+            ? basePath.slice(Math.max(0, type.length + 1))
+            : basePath
+          finalRelativePath = path.join(pWithoutType, compressedName)
+        }
+      }
+    }
+
+    await this.service.writeFile(
+      type,
+      finalRelativePath,
+      Readable.from(imageBuffer),
+    )
+    const fileUrl = await this.service.resolveFileUrl(type, finalRelativePath)
     if (type === 'image') {
       await this.fileReferenceService.createPendingReference(
         fileUrl,
-        relativePath,
+        finalRelativePath,
       )
     }
 
-    return { url: fileUrl, name: path.basename(relativePath) }
+    return { url: fileUrl, name: path.basename(finalRelativePath) }
   }
 
   @Put('/:type/:name')

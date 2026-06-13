@@ -15,6 +15,7 @@ import { S3Uploader } from '~/utils/s3.util'
 
 import { FileService } from './file.service'
 import { FileReferenceService } from './file-reference.service'
+import { ImageCompressionService } from './image-compression.service'
 
 const DEFAULT_COMMENT_UPLOAD_PREFIX_TEMPLATE = 'comments/{readerId}/{Y}/{m}'
 
@@ -76,6 +77,7 @@ export class CommentUploadService {
     private readonly configsService: ConfigsService,
     private readonly uploadService: UploadService,
     private readonly fileService: FileService,
+    private readonly imageCompressionService: ImageCompressionService,
   ) {}
 
   async getPublicConfig(): Promise<PublicCommentUploadConfig> {
@@ -133,6 +135,17 @@ export class CommentUploadService {
       readerId,
     })
 
+    // Apply image compression before storage
+    const compressed = await this.imageCompressionService.compress(buffer)
+    let finalBuffer = buffer
+    let finalFilename = filename
+    let finalMime = detectedMime
+    if (compressed) {
+      finalBuffer = compressed.data
+      finalFilename = filename.replace(/\.[^.]+$/, '') + compressed.ext
+      finalMime = compressed.mime
+    }
+
     const imageStorageConfig = await this.configsService.get(
       'imageStorageOptions',
     )
@@ -154,7 +167,9 @@ export class CommentUploadService {
       readerId,
     }).replace(/\/+$/, '')
 
-    const objectKey = renderedPath ? `${renderedPath}/${filename}` : filename
+    const objectKey = renderedPath
+      ? `${renderedPath}/${finalFilename}`
+      : finalFilename
 
     let url: string
     let s3ObjectKey: string | undefined
@@ -171,10 +186,10 @@ export class CommentUploadService {
         s3Uploader.setCustomDomain(imageStorageConfig.customDomain)
       }
       try {
-        url = await s3Uploader.uploadBuffer(buffer, objectKey, detectedMime)
+        url = await s3Uploader.uploadBuffer(finalBuffer, objectKey, finalMime)
       } catch (err) {
         this.logger.error(
-          `S3 upload failed endpoint=${imageStorageConfig.endpoint} bucket=${imageStorageConfig.bucket} region=${imageStorageConfig.region || 'auto'} objectKey=${objectKey} contentType=${detectedMime} byteSize=${totalBytes}: ${err instanceof Error ? err.message : String(err)}`,
+          `S3 upload failed endpoint=${imageStorageConfig.endpoint} bucket=${imageStorageConfig.bucket} region=${imageStorageConfig.region || 'auto'} objectKey=${objectKey} contentType=${finalMime} byteSize=${finalBuffer.length}: ${err instanceof Error ? err.message : String(err)}`,
         )
         throw err
       }
@@ -184,7 +199,7 @@ export class CommentUploadService {
       await this.fileService.writeFile(
         'image' as never,
         relativePath,
-        Readable.from(buffer),
+        Readable.from(finalBuffer),
       )
       url = await this.fileService.resolveFileUrl(
         'image' as never,
@@ -198,8 +213,8 @@ export class CommentUploadService {
       fileUrl: url,
       fileName,
       readerId,
-      mimeType: detectedMime,
-      byteSize: totalBytes,
+      mimeType: finalMime,
+      byteSize: finalBuffer.length,
       s3ObjectKey: s3ObjectKey ?? null,
     })
 
